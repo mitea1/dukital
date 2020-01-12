@@ -20,20 +20,8 @@ import math
 from queue import Queue
 from Timer import Timer
 from Display import Display
-
-
-
-
-BREAD_IMAGE = '../assets/bread.jpg'
-ZOPF_IMAGE = '../assets/zopf.jpg'
-BANANE_IMAGE = '../assets/banane.png'
-
-TIMER_FONT = '../assets/fonts/SF Electrotome.ttf'
-
-
-
-disp = None 
-
+from Encoder import Encoder
+from Application import Application
 
 
 def led_control_thread(name):
@@ -182,19 +170,16 @@ def callback(remaining_time):
         
 
 if __name__ == "__main__":
-    
-    queue_1 = Queue(maxsize=1)
+    A_PIN  = 21
+    B_PIN  = 23
+    SW_PIN = 22
+
     
     display = Display()
     display.init()
     timer = Timer()
-    timer.set_remaining_time_s(85)
-    timer.set_update_callback(display.show_timer_screen)
-    timer.start()
+    encoder_1 = Encoder(A_PIN,B_PIN,SW_PIN)
+    application = Application(display,timer,encoder_1,None)
     
-    thread_1 = threading.Thread(target=led_control_thread, args=(1,))
-    thread_1.start()
-    #thread_2 = threading.Thread(target=rotary_encoder_thread, args=(queue_1,))
-    #thread_2.start()
-    #thread_3 = threading.Thread(target=display_thread, args=(queue_1,))
-    #thread_3.start()
+    application.init()
+ 
