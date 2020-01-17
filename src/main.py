@@ -178,7 +178,7 @@ if __name__ == "__main__":
     display = Display()
     display.init()
     timer = Timer()
-    encoder_1 = Encoder(A_PIN,B_PIN,SW_PIN)
+    encoder_1 = Encoder(A_PIN,B_PIN,SW_PIN,"encoder_1")
     application = Application(display,timer,encoder_1,None)
     
     application.init()

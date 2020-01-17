@@ -7,10 +7,11 @@ import math
 
 class Encoder(object):
     
-    def __init__(self,a_pin,b_pin,sw_pin):
+    def __init__(self,a_pin,b_pin,sw_pin,name):
         self.A_PIN = a_pin
         self.B_PIN = b_pin
         self.SW_PIN = sw_pin
+        self.name = name
         self.position = 0
         self.cycles = 0
         gpio = gaugette.gpio.GPIO()
@@ -60,14 +61,19 @@ class Encoder(object):
         
 
                 self.position += delta
-                message=dict([('type','position'),('value',self.position)])
+                message=dict([('device',self.name),
+                              ('type','position'),
+                              ('value',self.position)])
                 queue.put(message)
                 print(message)
             
-            if (switch_state != self.last_switch_state and switch_state == 1):
+            if (switch_state != self.last_switch_state):
                 self.last_switch_state = switch_state
-                message=dict([('type','switch'),('value',switch_state)])
-                queue.put(message)
-                print(message)
+                if switch_state == 1:
+                    message=dict([('device',self.name),
+                                  ('type','switch'),
+                                  ('value',switch_state)])
+                    queue.put(message)
+                    print(message)
                 
             time.sleep(0.1)

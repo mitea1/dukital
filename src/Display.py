@@ -52,6 +52,11 @@ class Display(object):
         self.ssd1306.image(self.timer_image)
         self.ssd1306.display()
         print("show_timer_screen")
+        
+    def show_menu_screen(self,menu_image):
+        image = Image.open(menu_image).resize((self.ssd1306.width, self.ssd1306.height), Image.ANTIALIAS).convert('1')
+        self.ssd1306.image(image)
+        self.ssd1306.display()
     
         
         

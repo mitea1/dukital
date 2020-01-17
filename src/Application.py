@@ -33,23 +33,59 @@ class Application(object):
                 target=self.encoder_1.run, args=(self.encoder_1_queue,))
         self.my_own_thread = threading.Thread(
                 target=self.run, args=(1,))
+        self.timer_time = 0
+        self.menu_images=[BREAD_IMAGE,ZOPF_IMAGE,BANANE_IMAGE]
         
-    def state_machine(self):
+    def state_machine(self,device,type_,value):
         if self.application_state == Application_State.Init:
+            print("Init")
             self.display.init()
             self.timer.set_update_callback(self.display.show_timer_screen)
-        if self.application_state == Application_State.Menu_Dialog:
-            print("")
-        if self.application_state == Application_State.Timer_Countdown:
-            self.timer.set_update_callback(self.display.show_timer_screen)
-            self.timer.start()
+            if device == 'encoder_1' and type_ == 'position':
+                self.application_state = Application_State.Menu_Dialog
+                self.display.show_menu_screen(self.menu_images[0])
+            elif device == 'encoder_1' and type_ == 'switch' and value == 1:
+                self.application_state = Application_State.Timer_Setting
+                self.display.show_timer_screen(self.timer_time)
+                
+        elif self.application_state == Application_State.Menu_Dialog:
+            print("Menu_Dialog")
+            if device == 'encoder_1' and type_ == 'position':
+                self.display.show_menu_screen(self.menu_images[abs(value)%3])
+            elif device == 'encoder_1' and type_ == 'switch' and value == 1:
+                self.application_state = Application_State.Timer_Setting
+                self.display.show_timer_screen(self.timer_time)
+                
+        elif self.application_state == Application_State.Timer_Setting:
+            print("Timer_Setting")
+            if device == 'encoder_1' and type_ == 'position':
+                self.timer_time = abs(value)
+                self.display.show_timer_screen(self.timer_time)
+            elif device == 'encoder_1' and type_ == 'switch' and value == 1:
+                self.application_state = Application_State.Timer_Countdown 
+                self.timer.set_remaining_time_s(self.timer_time)
+                self.timer.start()
+
+        elif self.application_state == Application_State.Timer_Countdown:
+            print("Timer_Countdown")
+            if device == 'encoder_1' and type_ == 'switch' and value == 1:
+                self.application_state = Application_State.Menu_Dialog
+                self.timer_time = 0
+                self.timer.stop()
+            
     
     def handle_peripherals(self):
         try:
-            message_encoder_1 = self.encoder_1_queue.get_nowait()
-            print(message_encoder_1['type'])
-            print(message_encoder_1['value'])
+            message_encoder_1 = self.encoder_1_queue.get()
+            device = message_encoder_1['device']
+            type_ = message_encoder_1['type']
+            value = message_encoder_1['value']
+            print(device)
+            print(type_)
+            print(value)
+            self.state_machine(device,type_,value)
             self.encoder_1_queue.task_done()
+            
         except:
             print("empty")
             
@@ -60,7 +96,6 @@ class Application(object):
     def run(self,name):
         while True:
             print("hello")
-            time.sleep(1)
             self.handle_peripherals()
             
         
