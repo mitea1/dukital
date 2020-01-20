@@ -6,12 +6,15 @@ from PIL import ImageFont
 
 
 TIMER_FONT = '../assets/fonts/SF Electrotome.ttf'
+TEMPERATURE_FONT = TIMER_FONT
+
 class Display(object):
     RST=24
     
     def __init__(self):
         self.ssd1306 = SSD1306_128_64(rst=self.RST)
         self.timer_font = ImageFont.truetype(TIMER_FONT,size=45)
+        self.temperature_font = ImageFont.truetype(TEMPERATURE_FONT,size=45)
 
         
     def init(self):
@@ -52,6 +55,15 @@ class Display(object):
         self.ssd1306.image(self.timer_image)
         self.ssd1306.display()
         print("show_timer_screen")
+        
+        
+    def show_temperature_screen(self, temperature):
+        self.temperature_image = Image.new('1', (self.ssd1306.width, self.ssd1306.height),)
+        self.temperature_draw = ImageDraw.Draw(self.temperature_image)
+        self.temperature_draw.text((2, -2), str(temperature) + "°C",font=self.temperature_font, fill=255)
+        self.ssd1306.image(self.temperature_image)
+        self.ssd1306.display()
+        print("show_temperature_screen")
         
     def show_menu_screen(self,menu_image):
         image = Image.open(menu_image).resize((self.ssd1306.width, self.ssd1306.height), Image.ANTIALIAS).convert('1')

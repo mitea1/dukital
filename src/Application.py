@@ -17,6 +17,7 @@ class Application_State(Enum):
     Menu_Dialog = 1
     Timer_Setting = 2
     Timer_Countdown = 3
+    Temperature_Setting = 4
 
 
 class Application(object):
@@ -27,13 +28,16 @@ class Application(object):
         self.timer = Timer
         self.encoder_1 = Encoder_1
         self.encoder_2 = Encoder_2
-        self.encoder_1_queue = Queue(maxsize=1)
+        self.encoder_1_queue = Queue(maxsize=0)
         self.encoder_2_queue = Queue(maxsize=1)
         self.encoder_1_thread = threading.Thread(
                 target=self.encoder_1.run, args=(self.encoder_1_queue,))
+        self.encoder_2_thread = threading.Thread(
+                target=self.encoder_2.run, args=(self.encoder_1_queue,))
         self.my_own_thread = threading.Thread(
                 target=self.run, args=(1,))
         self.timer_time = 0
+        self.temperature = 0
         self.menu_images=[BREAD_IMAGE,ZOPF_IMAGE,BANANE_IMAGE]
         
     def state_machine(self,device,type_,value):
@@ -47,6 +51,9 @@ class Application(object):
             elif device == 'encoder_1' and type_ == 'switch' and value == 1:
                 self.application_state = Application_State.Timer_Setting
                 self.display.show_timer_screen(self.timer_time)
+            elif device == 'encoder_2' and type_ == 'switch' and value == 1:
+                self.application_state = Application_State.Temperature_Setting
+                self.display.show_temperature_screen(self.temperature)
                 
         elif self.application_state == Application_State.Menu_Dialog:
             print("Menu_Dialog")
@@ -55,6 +62,11 @@ class Application(object):
             elif device == 'encoder_1' and type_ == 'switch' and value == 1:
                 self.application_state = Application_State.Timer_Setting
                 self.display.show_timer_screen(self.timer_time)
+            elif device == 'encoder_2' and type_ == 'switch' and value == 1:
+                self.application_state = Application_State.Temperature_Setting
+                print("elif")
+                self.display.show_temperature_screen(self.temperature)
+                
                 
         elif self.application_state == Application_State.Timer_Setting:
             print("Timer_Setting")
@@ -66,6 +78,16 @@ class Application(object):
                 self.timer.set_remaining_time_s(self.timer_time)
                 self.timer.start()
 
+        elif self.application_state == Application_State.Temperature_Setting:
+            print("temperature setting")
+            if device == 'encoder_2' and type_ == 'position':
+                self.temperature = abs(value)
+                self.display.show_temperature_screen(self.temperature)
+            elif device == 'encoder_2' and type_ == 'switch' and value == 1:
+                self.application_state = Application_State.Menu_Dialog
+                self.display.show_menu_screen(self.menu_images[0])
+
+                
         elif self.application_state == Application_State.Timer_Countdown:
             print("Timer_Countdown")
             if device == 'encoder_1' and type_ == 'switch' and value == 1:
@@ -91,6 +113,7 @@ class Application(object):
             
     def init(self):
         self.encoder_1_thread.start()
+        self.encoder_2_thread.start()
         self.my_own_thread.start()
         
     def run(self,name):

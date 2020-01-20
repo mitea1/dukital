@@ -174,12 +174,16 @@ if __name__ == "__main__":
     B_PIN  = 23
     SW_PIN = 22
 
+    A_PIN_2  = 0
+    B_PIN_2  = 2
+    SW_PIN_2 = 3
     
     display = Display()
     display.init()
     timer = Timer()
     encoder_1 = Encoder(A_PIN,B_PIN,SW_PIN,"encoder_1")
-    application = Application(display,timer,encoder_1,None)
+    encoder_2 = Encoder(A_PIN_2,B_PIN_2,SW_PIN_2,"encoder_2")
+    application = Application(display,timer,encoder_1,encoder_2)
     
     application.init()
  
