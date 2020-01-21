@@ -60,7 +60,22 @@ class Display(object):
     def show_temperature_screen(self, temperature):
         self.temperature_image = Image.new('1', (self.ssd1306.width, self.ssd1306.height),)
         self.temperature_draw = ImageDraw.Draw(self.temperature_image)
-        self.temperature_draw.text((2, -2), str(temperature) + "°C",font=self.temperature_font, fill=255)
+        
+        if temperature >= 100:
+            third_digit = int(temperature/100)
+            second_digit = int((temperature-(third_digit * 100))/10)
+            first_digit = temperature - (second_digit * 10) - (third_digit * 100)
+            self.temperature_draw.text((2 + 20, -2), str(third_digit),font=self.temperature_font, fill=255)
+            self.temperature_draw.text((2 + 2*20, -2), str(second_digit),font=self.temperature_font, fill=255)
+        elif temperature >= 10:
+            second_digit = int(temperature/10)
+            first_digit = temperature - (second_digit * 10)
+            self.temperature_draw.text((2 + 2*20, -2), str(second_digit),font=self.temperature_font, fill=255)
+        else:
+            first_digit = temperature
+            
+        self.temperature_draw.text((2 + 3*20, -2), str(first_digit),font=self.temperature_font, fill=255)    
+        self.temperature_draw.text((2 + 4*20, -2),"°C",font=self.temperature_font, fill=255)
         self.ssd1306.image(self.temperature_image)
         self.ssd1306.display()
         print("show_temperature_screen")
