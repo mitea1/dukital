@@ -42,6 +42,7 @@ class Application(object):
                 target=self.run, args=(1,))
         self.timer_time = 0
         self.temperature = 0
+        self.menu_index = 0
         self.menu_images=[BREAD_IMAGE,ZOPF_IMAGE,BANANE_IMAGE]
         
     def state_machine(self,device,type_,value):
@@ -62,7 +63,9 @@ class Application(object):
         elif self.application_state == Application_State.Menu_Dialog:
             print("Menu_Dialog")
             if device == 'encoder_1' and type_ == 'position':
-                self.display.show_menu_screen(self.menu_images[abs(value)%3])
+                if self.menu_index > 0 or value > 0:
+                    self.menu_index += value
+                    self.display.show_menu_screen(self.menu_images[abs(self.menu_index)%3])
             elif device == 'encoder_1' and type_ == 'switch' and value == 1:
                 self.application_state = Application_State.Timer_Setting
                 self.display.show_timer_screen(self.timer_time)
@@ -75,8 +78,9 @@ class Application(object):
         elif self.application_state == Application_State.Timer_Setting:
             print("Timer_Setting")
             if device == 'encoder_1' and type_ == 'position':
-                self.timer_time = abs(value)
-                self.display.show_timer_screen(self.timer_time)
+                if self.timer_time > 0 or value > 0:
+                    self.timer_time += (value * 5)
+                    self.display.show_timer_screen(self.timer_time)
             elif device == 'encoder_1' and type_ == 'switch' and value == 1:
                 self.application_state = Application_State.Timer_Countdown 
                 self.timer.set_remaining_time_s(self.timer_time)
@@ -88,8 +92,9 @@ class Application(object):
         elif self.application_state == Application_State.Temperature_Setting:
             print("temperature setting")
             if device == 'encoder_2' and type_ == 'position':
-                self.temperature = abs(value)
-                self.display.show_temperature_screen(self.temperature)
+                if self.temperature > 0 or value > 0:
+                    self.temperature += (value * 5)
+                    self.display.show_temperature_screen(self.temperature)
             elif device == 'encoder_2' and type_ == 'switch' and value == 1:
                 self.application_state = Application_State.Menu_Dialog
                 self.display.show_menu_screen(self.menu_images[0])

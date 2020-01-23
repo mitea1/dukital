@@ -59,11 +59,9 @@ class Encoder(object):
                 self.cycles = self.remainder // self.steps_per_cycle
                 self.remainder %= self.steps_per_cycle
         
-
-                self.position += delta
                 message=dict([('device',self.name),
                               ('type','position'),
-                              ('value',self.position)])
+                              ('value',delta)])
                 queue.put(message)
                 print(message)
             
