@@ -88,6 +88,11 @@ class Application(object):
             elif device == 'encoder_2' and type_ == 'switch' and value == 1:
                 self.application_state = Application_State.Temperature_Setting
                 self.display.show_temperature_screen(self.temperature)
+            elif device == 'encoder_2' and type_ == 'position':
+                if self.temperature > 0 or value > 0:
+                    self.application_state = Application_State.Temperature_Setting
+                    self.temperature += (value * 5)
+                    self.display.show_temperature_screen(self.temperature)
 
         elif self.application_state == Application_State.Temperature_Setting:
             print("temperature setting")
@@ -101,6 +106,11 @@ class Application(object):
             elif device == 'encoder_1' and type_ == 'switch' and value == 1:
                 self.application_state = Application_State.Timer_Setting
                 self.display.show_timer_screen(self.timer_time)
+            elif device == 'encoder_1' and type_ == 'position':
+                if self.timer_time > 0 or value > 0:
+                    self.application_state = Application_State.Timer_Setting
+                    self.timer_time += (value * 5)
+                    self.display.show_timer_screen(self.timer_time)
 
                 
         elif self.application_state == Application_State.Timer_Countdown:
@@ -109,6 +119,9 @@ class Application(object):
                 self.application_state = Application_State.Menu_Dialog
                 self.timer_time = 0
                 self.timer.stop()
+            elif (device == 'encoder_1' or device == 'encoder_2') and self.timer.get_remaining_time_s()== 0:
+                self.application_state = Application_State.Menu_Dialog
+                self.display.show_menu_screen(self.menu_images[abs(self.menu_index)%3])
             
     
     def handle_peripherals(self):
